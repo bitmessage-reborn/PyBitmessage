@@ -1,0 +1,124 @@
+--- qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/wtf/TypeTraits.h~	2015-05-07 16:14:48.000000000 +0200
++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/wtf/TypeTraits.h	2019-09-14 17:24:05.875744690 +0200
+@@ -170,8 +170,8 @@
+ 
+     // GCC's libstdc++ 20070724 and later supports C++ TR1 type_traits in the std namespace.
+     // VC10 (VS2010) and later support C++ TR1 type_traits in the std::tr1 namespace.
+-    template<typename T> struct HasTrivialConstructor : public std::tr1::has_trivial_constructor<T> { };
+-    template<typename T> struct HasTrivialDestructor : public std::tr1::has_trivial_destructor<T> { };
++    template<typename T> struct HasTrivialConstructor : public std::is_trivially_constructible<T> { };
++    template<typename T> struct HasTrivialDestructor : public std::is_trivially_destructible<T> { };
+ 
+ #else
+ 
+--- qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/wtf/HashTable.h~	2015-05-07 16:14:48.000000000 +0200
++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/wtf/HashTable.h	2019-09-14 20:25:57.045375344 +0200
+@@ -257,7 +257,7 @@
+ 
+     using std::swap;
+ 
+-#if !COMPILER(MSVC) && !OS(QNX) && !defined(_LIBCPP_VERSION)
++#if 0 && !COMPILER(MSVC) && !OS(QNX) && !defined(_LIBCPP_VERSION)
+     // The Dinkumware C++ library (used by MSVC and QNX) and clang's libc++ have a swap for pairs defined.
+ 
+     // swap pairs by component, in case of pair members that specialize swap
+--- qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.h~	2015-05-07 16:14:48.000000000 +0200
++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.h	2019-09-14 18:06:14.575659781 +0200
+@@ -317,7 +317,7 @@
+         TransitionTable* transitionTable = new TransitionTable;
+         setTransitionTable(transitionTable);
+         if (existingTransition)
+-            add(StructureTransitionTableHash::Key(RefPtr<UString::Rep>(existingTransition->m_nameInPrevious.get()), existingTransition->m_attributesInPrevious), existingTransition, existingTransition->m_specificValueInPrevious);
++            add(StructureTransitionTableHash::Key(RefPtr<UString::Rep>(existingTransition->m_nameInPrevious.get()), +existingTransition->m_attributesInPrevious), existingTransition, existingTransition->m_specificValueInPrevious);
+     }
+ } // namespace JSC
+ 
+--- qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.cpp~	2015-05-07 16:14:48.000000000 +0200
++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.cpp	2019-09-14 18:05:24.248994834 +0200
+@@ -157,7 +157,7 @@
+ {
+     if (m_previous) {
+         if (m_nameInPrevious)
+-            m_previous->table.remove(StructureTransitionTableHash::Key(RefPtr<UString::Rep>(m_nameInPrevious.get()), m_attributesInPrevious), m_specificValueInPrevious);
++            m_previous->table.remove(StructureTransitionTableHash::Key(RefPtr<UString::Rep>(m_nameInPrevious.get()), +m_attributesInPrevious), m_specificValueInPrevious);
+         else
+             m_previous->table.removeAnonymousSlotTransition(m_anonymousSlotsInPrevious);
+ 
+@@ -280,7 +280,7 @@
+             continue;
+         }
+         structure->m_nameInPrevious->ref();
+-        PropertyMapEntry entry(structure->m_nameInPrevious.get(), structure->m_offset, structure->m_attributesInPrevious, structure->m_specificValueInPrevious, ++m_propertyTable->lastIndexUsed);
++        PropertyMapEntry entry(structure->m_nameInPrevious.get(), structure->m_offset, +structure->m_attributesInPrevious, structure->m_specificValueInPrevious, ++m_propertyTable->lastIndexUsed);
+         insertIntoPropertyMapHashTable(entry);
+     }
+ }
+--- qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/yarr/RegexCompiler.cpp~	2015-05-07 16:14:47.000000000 +0200
++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/javascriptcore/JavaScriptCore/yarr/RegexCompiler.cpp	2019-09-14 18:26:54.518951294 +0200
+@@ -719,7 +719,7 @@
+ 
+     constructor.setupOffsets();
+ 
+-    return false;
++    return NULL;
+ };
+ 
+ 
+--- qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/JavaScriptCore/wtf/TypeTraits.h~	2015-05-07 16:14:45.000000000 +0200
++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/JavaScriptCore/wtf/TypeTraits.h	2019-09-14 18:23:03.718959093 +0200
+@@ -183,8 +183,8 @@
+ 
+     // GCC's libstdc++ 20070724 and later supports C++ TR1 type_traits in the std namespace.
+     // VC10 (VS2010) and later support C++ TR1 type_traits in the std::tr1 namespace.
+-    template<typename T> struct HasTrivialConstructor : public std::tr1::has_trivial_constructor<T> { };
+-    template<typename T> struct HasTrivialDestructor : public std::tr1::has_trivial_destructor<T> { };
++    template<typename T> struct HasTrivialConstructor : public std::is_trivially_constructible<T> { };
++    template<typename T> struct HasTrivialDestructor : public std::is_trivially_destructible<T> { };
+ 
+ #else
+ 
+--- qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/JavaScriptCore/wtf/HashSet.h~	2015-05-07 16:14:45.000000000 +0200
++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/JavaScriptCore/wtf/HashSet.h	2019-09-14 18:32:15.168940587 +0200
+@@ -188,7 +188,8 @@
+ #if COMPILER(MSVC) && _MSC_VER >= 1700
+         return iterator_const_cast(m_impl.add(value));
+ #else
+-        return m_impl.add(value);
++        pair<typename HashTableType::iterator, bool> p = m_impl.add(value);
++        return pair<iterator, bool>(iterator(p.first), p.second);
+ #endif
+     }
+ 
+@@ -201,7 +202,8 @@
+ #if COMPILER(MSVC) && _MSC_VER >= 1700
+         return iterator_const_cast(m_impl.template addPassingHashCode<T, T, Adapter>(value, value));
+ #else
+-        return m_impl.template addPassingHashCode<T, T, Adapter>(value, value);
++        pair<typename HashTableType::iterator, bool> p = m_impl.template addPassingHashCode<T, T, Adapter>(value, value);
++        return pair<iterator, bool>(iterator(p.first), p.second);
+ #endif
+     }
+ 
+--- qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/WebCore/dom/Element.cpp~	2015-05-07 16:14:47.000000000 +0200
++++ qt-everywhere-opensource-src-4.8.7/src/3rdparty/webkit/Source/WebCore/dom/Element.cpp	2019-09-14 18:39:17.915592915 +0200
+@@ -1080,7 +1080,7 @@
+ {
+     // Ref currentStyle in case it would otherwise be deleted when setRenderStyle() is called.
+     RefPtr<RenderStyle> currentStyle(renderStyle());
+-    bool hasParentStyle = parentNodeForRenderingAndStyle() ? parentNodeForRenderingAndStyle()->renderStyle() : false;
++    bool hasParentStyle = parentNodeForRenderingAndStyle() ? bool(parentNodeForRenderingAndStyle()->renderStyle()) : false;
+     bool hasDirectAdjacentRules = currentStyle && currentStyle->childrenAffectedByDirectAdjacentRules();
+     bool hasIndirectAdjacentRules = currentStyle && currentStyle->childrenAffectedByForwardPositionalRules();
+ 
+--- qt-everywhere-opensource-src-4.8.7/src/plugins/accessible/widgets/itemviews.cpp~	2015-05-07 16:14:48.000000000 +0200
++++ qt-everywhere-opensource-src-4.8.7/src/plugins/accessible/widgets/itemviews.cpp	2019-09-14 18:37:01.048930870 +0200
+@@ -393,7 +393,7 @@
+     QModelIndex index = view()->model()->index(0, column, view()->rootIndex());
+     if (!index.isValid() || view()->selectionMode() & QAbstractItemView::NoSelection)
+         return false;
+-    view()->selectionModel()->select(index, QItemSelectionModel::Columns & QItemSelectionModel::Deselect);
++    view()->selectionModel()->select(index, QItemSelectionModel::Columns | QItemSelectionModel::Deselect);
+     return true;
+ }
+ 
+

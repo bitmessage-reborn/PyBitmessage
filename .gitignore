@@ -16,9 +16,13 @@ dist
 *.egg-info
 docs/_*/*
 docs/autodoc/
-build
 pyan/
 **.coverage
 **htmlcov*
 **coverage.json
 
+!/build
+/build/*
+!/build/build.sh
+!/build/build-deps.sh
+!/build/*.patch
